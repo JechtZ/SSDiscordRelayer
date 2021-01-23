@@ -1,0 +1,3 @@
+[submodule "project/StarSonataAPI"]
+	path = project/StarSonataAPI
+	url = git@github.com:Delph/StarSonataAPI.git

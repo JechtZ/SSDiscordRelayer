@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    restart: always
+    volumes:
+      - ./project:/app
+    command: 'python3 bot.py'
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - bot.env
+    network_mode: host
