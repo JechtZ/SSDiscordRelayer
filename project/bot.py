@@ -28,13 +28,22 @@ channel_mappings = []
 with open('mapping.json', 'r') as f:
   channel_mappings = json.loads(f.read())
 
+# make sure the mapping is valid
+for mapping in channel_mappings:
+  if 'STARSONATA_CHANNEL' not in mapping:
+    raise KeyError('STARSONATA_CHANNEL')
+  if 'DISCORD_CHANNEL' not in mapping:
+    raise KeyError('DISCORD_CHANNEL')
+  if 'MODE' not in mapping:
+    raise KeyError('MODE')
+
 
 def recv_mapping(channel):
   channels = []
   for mapping in channel_mappings:
     if TextMessage.channel_to_recv(mapping['STARSONATA_CHANNEL']) != channel:
       continue
-    if mapping['MODE'] == 'READ' or mapping['MODE'] == 'BOTH':
+    if 'r' in mapping['MODE']:
       channels.append(client.get_channel(id=mapping['DISCORD_CHANNEL']))
   return channels
 
@@ -43,7 +52,7 @@ def send_mapping(channel):
   for mapping in channel_mappings:
     if mapping['DISCORD_CHANNEL'] != channel:
       continue
-    if mapping['MODE'] == 'WRITE' or mapping['MODE'] == 'BOTH':
+    if 'w' in mapping['MODE']:
       channels.append(TextMessage.channel_to_send(mapping['STARSONATA_CHANNEL']))
   return channels
 
