@@ -12,8 +12,6 @@ import math
 import sys
 import json
 
-import settings
-
 from StarSonataAPI import *
 from StarSonataAPI.message_types import *
 
