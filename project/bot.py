@@ -145,7 +145,11 @@ async def text_message(message):
   tm = TextMessage()
   tm.buf_in(message.payload)
 
-  message = f'**[{tm.username}]** {tm.message}'
+  message = ''
+  if username in tm:
+    message = f'**[{tm.username}]** {tm.message}'
+  else:
+    message = f'{tm.message}'
 
   channels = recv_mapping(tm.type)
   for channel in channels:
