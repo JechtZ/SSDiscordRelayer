@@ -6,7 +6,6 @@ import pytz
 import os
 import random
 import re
-import requests
 import xml.etree.ElementTree as ElementTree
 import math
 import sys
@@ -53,61 +52,6 @@ def send_mapping(channel):
     if 'w' in mapping['MODE']:
       channels.append(TextMessage.channel_to_send(mapping['STARSONATA_CHANNEL']))
   return channels
-
-
-async def bboard():
-  channel = client.get_channel(id=int(os.environ.get('BULLETIN_BOARD_CH')))
-  post_id = None
-  source = 'http://starsonata.com/ss_api/bboard.xml'
-
-  regexp = re.compile(r'@((?:[^@:#]|(?:```))+?)#\d{4}?')
-
-  while not client.is_closed():
-    with requests.get(source) as request:
-      tree = ElementTree.fromstring(request.content)
-
-      update = datetime.now(pytz.timezone('America/New_York'))
-      update_str = 'Last updated: %s (%s)\n' % (update.strftime('%Y-%m-%d %H:%M:%S'), 'EDT' if update.dst() else 'EST')
-      update_len = len(update_str)
-
-      posts = []
-      for entry in tree:
-        notice = regexp.sub(r'\1', entry.attrib['notice'])
-        posts.append({
-          'author': entry.attrib['author'],
-          'credits': float(entry.attrib['credits']),
-          'notice': notice
-        })
-      posts.sort(key=lambda p: p['credits'])
-
-      content = ''
-      for post in posts:
-        old = content
-        content = '%s\n%s at %s credits\n%s\n%s' % (
-          post['notice'],
-          post['author'],
-          f"{int(post['credits']):,}",
-          '=' * 10,
-          content
-        )
-        if len(content) + update_len + 3 > 2000:
-          content = old
-          break
-      content = '\n%s\n\n%s' % (content, update_str)
-
-    if post_id is None:
-      try:
-        message = await channel.fetch_message(channel.last_message_id)
-        if message:
-          post_id = message.id
-      except:
-        pass
-    if post_id:
-      message = await channel.fetch_message(post_id)
-      await message.edit(content=content)
-    else:
-      post_id = (await channel.send(content)).id
-    await asyncio.sleep(300)
 
 
 @ss.on_event(SC_CHARACTERLIST)
