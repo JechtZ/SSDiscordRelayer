@@ -14,7 +14,7 @@ git clone git@github.com:Delph/Relayer.git
 cd Relayer
 
 # grab the SS API dependency
-git submodule update --recursive
+git submodule update --init --recursive
 
 # configure
 nano bot.env
