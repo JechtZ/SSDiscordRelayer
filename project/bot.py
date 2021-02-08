@@ -97,7 +97,7 @@ async def text_message(message):
   tm.buf_in(message.payload)
 
   message = ''
-  if 'username' in tm:
+  if tm.username is not None:
     message = f'**[{tm.username}]** {tm.message}'
   else:
     message = f'{tm.message}'
