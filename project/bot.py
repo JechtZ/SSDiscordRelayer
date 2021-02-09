@@ -167,7 +167,14 @@ async def on_message(message):
   for chat in chats:
     tm = TextMessage()
     tm.type = chat
-    tm.message = f'[{message.author.display_name}] {message.content}'
+    reference = message.reference.resolved if message.reference is not None else None
+    if reference is not None:
+      if isinstance(reference, discord.DeletedReferencedMessage):
+        tm.message = f'[{message.author.display_name} (replying to deleted)] {message.content}'
+      else:
+        tm.message = f'[{message.author.display_name} (replying to {reference.author.display_name}] {message.content}'
+    else:
+      tm.message = f'[{message.author.display_name}] {message.content}'
     for mention in message.mentions:
       tm.message = tm.message.replace(f'<@!{mention.id}>', f'@{mention.name}')
     for mention in message.role_mentions:
@@ -184,6 +191,7 @@ if os.environ.get('RELAY_PASSWORD') is None:
   raise Exception('RELAY_PASSWORD not set.')
 if os.environ.get('RELAY_CHARACTER') is None:
   raise Exception('RELAY_CHARACTER not set.')
+
 
 print(f'BobboBot running on discord.py version {discord.__version__}')
 print('Starting bot')
