@@ -127,10 +127,12 @@ async def team_member(message):
     action = 'off'
   else:
     return
-  message = f'**{name}** has logged {action}'
-  channels = recv_mapping(TextMessage.channel_to_recv('TEAM'))
-  for channel in channels:
-    await channel.send(message)
+
+  if os.environ.get('TEAM_MEMBER_NOTIFCATIONS', False):
+    message = f'**{name}** has logged {action}'
+    channels = recv_mapping(TextMessage.channel_to_recv('TEAM'))
+    for channel in channels:
+      await channel.send(message)
 
 
 @client.event
