@@ -6,7 +6,8 @@ services:
     restart: always
     volumes:
       - ./project:/app
-      - ./mapping.json:/app/mapping.json
+      - ./mapping.json:/mapping.json
+      - ./alerts.json:/alerts.json
     command: 'python3 bot.py'
     environment:
       - PYTHONUNBUFFERED=1

@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from datetime import datetime
+from datetime import datetime, timedelta
 import discord
 import pytz
 import os
@@ -22,7 +22,7 @@ ss = StarSonataAPI()
 
 # read the mapping
 channel_mappings = []
-with open('mapping.json', 'r') as f:
+with open('/mapping.json', 'r') as f:
   channel_mappings = json.loads(f.read())
 
 # make sure the mapping is valid
@@ -35,6 +35,17 @@ for mapping in channel_mappings:
     raise KeyError('MODE')
 
 
+# read alerts
+alerts = []
+with open('/alerts.json', 'r') as f:
+  alerts = json.loads(f.read())
+
+# make sure it's valid/precompile the regex
+for alert in alerts:
+  alert['_regexp'] = re.compile(alert['pattern'])
+  alert['_next'] = datetime.now()
+
+
 def recv_mapping(channel):
   channels = []
   for mapping in channel_mappings:
@@ -43,6 +54,7 @@ def recv_mapping(channel):
     if 'r' in mapping['MODE']:
       channels.append(client.get_channel(id=mapping['DISCORD_CHANNEL']))
   return channels
+
 
 def send_mapping(channel):
   channels = []
@@ -95,6 +107,29 @@ async def choose_character(message):
 async def text_message(message):
   tm = TextMessage()
   tm.buf_in(message.payload)
+
+  for alert in alerts:
+    if alert['_next'] > datetime.now():
+      continue
+    regexp = alert['_regexp']
+    match = re.search(regexp, tm.message)
+    if match:
+      extracted = match.groupdict()
+      if 'ignore' in alert:
+        ignore = False
+        for case in alert['ignore']:
+          k,v = case.split('=')
+          if k in extracted and extracted[k] == v:
+            ignore = True
+        if ignore:
+          continue
+      alert['_next'] = datetime.now() + timedelta(minutes=10)
+      message = alert['message'].format(**extracted)
+      if 'mentions' in alert and len(alert['mentions']):
+        message += ' - ' + ', '.join([f'<@&{id}>' for id in alert['mentions']])
+
+      for channel in alert['channels']:
+        await client.get_channel(id=channel).send(message)
 
   message = ''
   if tm.username is not None:
@@ -193,6 +228,6 @@ if os.environ.get('RELAY_CHARACTER') is None:
   raise Exception('RELAY_CHARACTER not set.')
 
 
-print(f'BobboBot running on discord.py version {discord.__version__}')
+print(f'Relayer running on discord.py version {discord.__version__}')
 print('Starting bot')
 client.run(os.environ.get('DISCORD_TOKEN'))
