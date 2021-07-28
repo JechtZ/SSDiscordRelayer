@@ -6,7 +6,7 @@ Install [Docker](https://hub.docker.com/search?q=&type=edition&offering=communit
 
 Sign up for [Discord Developer](https://discord.com/developers/applications) and create a bot.
 
-Head to the OAuth2 tab, under the *OAuth2 URL Generator* section, check the *bot* scope and copy the generated URL. Paste this in yuor browser to invite the bot to your Discord server.
+Head to the OAuth2 tab, under the *OAuth2 URL Generator* section, check the *bot* scope and copy the generated URL. Paste this in your browser's address bar to invite the bot to your Discord server.
 
 ```bash
 # clone a copy of the repository
