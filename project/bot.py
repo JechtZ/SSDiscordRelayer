@@ -153,7 +153,7 @@ async def team_member(message):
     name += chr(data[offset])
     offset += 1
   offset += 1
-  (rank, lastOn) = struct.unpack('<hi', data[offset:])
+  (rank, lastOn) = struct.unpack('<hi', data[offset:offset+6])
 
   action = None
   if lastOn == -1:
