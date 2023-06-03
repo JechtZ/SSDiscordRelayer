@@ -18,6 +18,7 @@ import struct
 
 client = discord.Client()
 ss = StarSonataAPI()
+have_squad = False
 
 
 # read the mapping
@@ -107,6 +108,7 @@ async def choose_character(message):
 async def text_message(message):
   tm = TextMessage()
   tm.buf_in(message.payload)
+  global have_squad
 
   for alert in alerts:
     if alert['_next'] > datetime.now():
@@ -130,6 +132,26 @@ async def text_message(message):
 
       for channel in alert['channels']:
         await client.get_channel(id=channel).send(message)
+
+  if tm.message == '!squad':
+    if tm.username in [m['name'] for m in ss.team.members]:
+      if not have_squad:
+        await ss.send_message(TextMessage(USER_TALK_TEAM, '/squadcreate'))
+        await ss.send_message(TextMessage(USER_TALK_TEAM, 'Creating Squad'))
+        have_squad = True
+    await ss.send_message(TextMessage(USER_TALK_TEAM, f'/squadinvite {tm.username}'))
+  elif tm.message == '!inviteall':
+    if tm.username in [m['name'] for m in ss.team.members]:
+      if have_squad:
+        for member in ss.team.members:
+          member_name = member['name']
+          await ss.send_message(TextMessage(USER_TALK_TEAM, f'/squadinvite {member_name}'))
+      else:
+        await ss.send_message(TextMessage(USER_TALK_TEAM, 'You must create squad first with !squad'))
+  elif tm.message == '!leave':
+    if tm.username in [m['name'] for m in ss.team.members]:
+      await ss.send_message(TextMessage(USER_TALK_TEAM, '/squadleave'))
+      have_squad = False
 
   message = ''
   if tm.username is not None:
