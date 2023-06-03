@@ -207,7 +207,7 @@ async def on_message(message):
       if isinstance(reference, discord.DeletedReferencedMessage):
         tm.message = f'[{message.author.display_name} (replying to deleted)] {message.content}'
       else:
-        tm.message = f'[{message.author.display_name} (replying to {reference.author.display_name}] {message.content}'
+        tm.message = f'[{message.author.display_name} (replying to {reference.author.display_name})] {message.content}'
     else:
       tm.message = f'[{message.author.display_name}] {message.content}'
     for mention in message.mentions:
