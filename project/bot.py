@@ -137,20 +137,23 @@ async def text_message(message):
     if tm.username in [m['name'] for m in ss.team.members]:
       if not have_squad:
         await ss.send_message(TextMessage(USER_TALK_TEAM, '/squadcreate'))
-        await ss.send_message(TextMessage(USER_TALK_TEAM, 'Creating Squad'))
+        await ss.send_message(TextMessage(USER_TALK_TEAM, 'Creating squad'))
         have_squad = True
     await ss.send_message(TextMessage(USER_TALK_TEAM, f'/squadinvite {tm.username}'))
   elif tm.message == '!inviteall':
     if tm.username in [m['name'] for m in ss.team.members]:
-      if have_squad:
-        for member in ss.team.members:
-          member_name = member['name']
-          await ss.send_message(TextMessage(USER_TALK_TEAM, f'/squadinvite {member_name}'))
-      else:
-        await ss.send_message(TextMessage(USER_TALK_TEAM, 'You must create squad first with !squad'))
+      if not have_squad:
+        await ss.send_message(TextMessage(USER_TALK_TEAM, '/squadcreate'))
+        await ss.send_message(TextMessage(USER_TALK_TEAM, 'Creating squad'))
+        have_squad = True
+      for member in [m for m in ss.team.members if m['lastOn'] == -1]:
+        member_name = member['name']
+        await ss.send_message(TextMessage(USER_TALK_TEAM, f'/squadinvite {member_name}'))
+      await ss.send_message(TextMessage(USER_TALK_TEAM, 'Invited everyone'))
   elif tm.message == '!leave':
     if tm.username in [m['name'] for m in ss.team.members]:
       await ss.send_message(TextMessage(USER_TALK_TEAM, '/squadleave'))
+      await ss.send_message(TextMessage(USER_TALK_TEAM, 'Left the squad'))
       have_squad = False
 
   message = ''
